@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System;
 public class playerController : MonoBehaviour {
 
     //movement variables
@@ -10,6 +10,14 @@ public class playerController : MonoBehaviour {
     Animator myAnim;
 
     bool facingRight;
+
+    //for jumping
+    bool grounded = false;
+    Collider[] groundCollisions;
+    float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
+    public Transform groundCheck;
+    public float jumpHeight;
 
 	// Use this for initialization
 	void Start () {
@@ -24,6 +32,21 @@ public class playerController : MonoBehaviour {
 	}
 
     void FixedUpdate() {
+        //Debug.Log(grounded);
+        //jumping
+        if (grounded && Input.GetAxis("Jump")>0) {
+            grounded = false;
+            myAnim.SetBool("grounded", grounded);
+            myRB.AddForce(new Vector3(0, jumpHeight, 0));
+        }
+
+        groundCollisions = Physics.OverlapSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        if (groundCollisions.Length > 0) grounded = true;
+        else grounded = false;
+
+        myAnim.SetBool("grounded", grounded);
+
+        // moving
         float move = Input.GetAxis("Horizontal");
         myAnim.SetFloat("speed", Mathf.Abs(move));
 
